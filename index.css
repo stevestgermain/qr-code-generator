@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Full-page dark background for iframe */
+html.dark body {
+  background-color: #050706;
+}
