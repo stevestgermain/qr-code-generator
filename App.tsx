@@ -4,7 +4,9 @@ import { QrCodeTool } from "./components/QRCodeTool";
 export type Theme = "light" | "dark";
 
 export default function App() {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(() =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
   // Keep <html> in sync with theme
   useEffect(() => {
@@ -40,3 +42,4 @@ export default function App() {
     </div>
   );
 }
+
