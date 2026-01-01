@@ -1,0 +1,5 @@
+{
+  "name": "QR Code Generator",
+  "description": "A quick and reliable QR code builder. Generate high-quality QR codes with custom logos instantly.",
+  "requestFramePermissions": []
+}
