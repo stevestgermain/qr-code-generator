@@ -1,70 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR Code Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Media Drive QR Code Generator</title>
+
+    <!-- Inter font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Instant dark-mode sync with parent (no flash) -->
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              blue: {
-                50: '#eff6ff',
-                100: '#dbeafe',
-                200: '#bfdbfe',
-                300: '#93c5fd',
-                400: '#60a5fa',
-                500: '#3b82f6',
-                600: '#2563eb', // Brand Blue
-                700: '#1d4ed8',
-                800: '#1e40af',
-                900: '#1e3a8a',
-              },
-              gray: {
-                50: '#f9fafb', // Background
-                100: '#f3f4f6',
-                200: '#e5e7eb', // Borders
-                300: '#d1d5db',
-                400: '#9ca3af', // Placeholder/Label
-                500: '#6b7280', // Text Muted
-                600: '#4b5563',
-                700: '#374151',
-                800: '#1f2937',
-                900: '#111827', // Text Dark
-              }
-            }
+      (function () {
+        function applyTheme(theme) {
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
           }
         }
-      }
+
+        function handleMessage(event) {
+          const data = event.data || {};
+          if (
+            (data.type === "THEME_CHANGE" || data.type === "THEME_RESPONSE") &&
+            (data.theme === "dark" || data.theme === "light")
+          ) {
+            applyTheme(data.theme);
+          }
+        }
+
+        window.addEventListener("message", handleMessage, false);
+
+        // Ask parent for theme ASAP
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: "REQUEST_THEME" }, "*");
+          }
+        } catch (e) {}
+      })();
     </script>
-    <style>
-      body {
-        background-color: #ffffff;
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "qrcode.react": "https://esm.sh/qrcode.react@^4.2.0"
-  }
-}
-</script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
+
+    <!-- Vite React entry (root-level index.tsx) -->
     <script type="module" src="./index.tsx"></script>
+
+    <!-- Iframe Resizer hook -->
     <script src="https://cdn.jsdelivr.net/npm/iframe-resizer/js/iframeResizer.contentWindow.min.js"></script>
   </body>
 </html>
