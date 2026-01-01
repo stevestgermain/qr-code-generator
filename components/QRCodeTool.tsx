@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   QrCode,
   Link2,
@@ -7,7 +7,8 @@ import {
   RefreshCw,
   Info,
 } from "lucide-react";
-import { QRCodeCanvas } from "qrcode.react";
+import QRCode from "qrcode";
+import type { Theme } from "../App";
 
 type ErrorCorrection = "L" | "M" | "Q" | "H";
 
@@ -66,28 +67,47 @@ const StyledInput: React.FC<{
   </div>
 );
 
-export const QrCodeTool: React.FC = () => {
+export const QrCodeTool: React.FC<{ theme: Theme }> = ({ theme }) => {
   const [input, setInput] = useState("");
   const [size, setSize] = useState(256);
   const [errorCorrection, setErrorCorrection] = useState<ErrorCorrection>("M");
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const hasContent = input.trim().length > 0;
 
-  const handleClear = () => {
-    setInput("");
-  };
+  // Draw QR code whenever dependencies change
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const bgColor = theme === "dark" ? "#050706" : "#ffffff";
+
+    QRCode.toCanvas(canvas, hasContent ? input : " ", {
+      width: size,
+      margin: 2,
+      errorCorrectionLevel: errorCorrection,
+      color: {
+        dark: "#020617", // slate-950-ish
+        light: bgColor,
+      },
+    }).catch(() => {
+      // fail silently; this is display only
+    });
+  }, [input, size, errorCorrection, theme, hasContent]);
+
+  const handleClear = () => setInput("");
 
   const handleCopy = async () => {
     if (!hasContent || !navigator.clipboard) return;
     try {
       await navigator.clipboard.writeText(input);
     } catch {
-      // fail silently – purely UX
+      // ignore
     }
   };
 
   const handleDownload = () => {
-    const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement | null;
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
     const link = document.createElement("a");
@@ -189,14 +209,11 @@ export const QrCodeTool: React.FC = () => {
 
           <div className="flex flex-col items-center gap-4">
             <div className="rounded-3xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-950/60 p-4 shadow-inner">
-              <QRCodeCanvas
-                id="qr-canvas"
-                value={hasContent ? input : " "}
-                size={size}
-                level={errorCorrection}
-                includeMargin={true}
-                bgColor={themeBackground()}
-                fgColor="#020617"
+              <canvas
+                ref={canvasRef}
+                width={size}
+                height={size}
+                className="block"
               />
             </div>
 
@@ -220,14 +237,3 @@ export const QrCodeTool: React.FC = () => {
     </>
   );
 };
-
-/**
- * Background to keep QR edges clean in dark mode.
- * Using a subtle near-white so the code looks consistent in both themes.
- */
-function themeBackground(): string {
-  if (typeof document === "undefined") return "#ffffff";
-  return document.documentElement.classList.contains("dark")
-    ? "#050706"
-    : "#ffffff";
-}
