@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { QrCodeTool } from "./components/QrCodeTool";
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark";
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>("light");
 
-  // Keep <html> in sync with internal theme state
+  // Keep <html> in sync with theme
   useEffect(() => {
     const root = document.documentElement;
     if (theme === "dark") {
@@ -16,7 +16,7 @@ export default function App() {
     }
   }, [theme]);
 
-  // Listen for parent postMessage events
+  // Listen for parent window postMessage
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       const data = event.data || {};
@@ -35,7 +35,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans flex justify-center items-start pt-6 pb-12 px-4 bg-white text-gray-900 dark:bg-[#050706] dark:text-white">
       <div className="w-full max-w-[460px] mx-auto">
-        <QrCodeTool />
+        <QrCodeTool theme={theme} />
       </div>
     </div>
   );
