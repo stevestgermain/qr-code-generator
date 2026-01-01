@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { QrCodeTool } from "./components/QrCodeTool";
+import { QrCodeTool } from "./components/QRCodeTool";
 
 export type Theme = "light" | "dark";
 
