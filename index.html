@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
 
-    <!-- Instant dark-mode sync with parent (no flash) -->
+    <!-- Instant dark-mode sync with parent + prefers-color-scheme fallback -->
     <script>
       (function () {
         function applyTheme(theme) {
@@ -19,6 +19,21 @@
             document.documentElement.classList.add("dark");
           } else {
             document.documentElement.classList.remove("dark");
+          }
+        }
+
+        function detectInitialTheme() {
+          try {
+            if (
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+            ) {
+              applyTheme("dark");
+            } else {
+              applyTheme("light");
+            }
+          } catch (e) {
+            applyTheme("light");
           }
         }
 
@@ -32,9 +47,13 @@
           }
         }
 
+        // 1) Respect system theme by default
+        detectInitialTheme();
+
+        // 2) Then stay in sync with parent messages
         window.addEventListener("message", handleMessage, false);
 
-        // Ask parent for theme ASAP
+        // 3) Ask parent what theme it is using (if implemented)
         try {
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: "REQUEST_THEME" }, "*");
@@ -53,3 +72,4 @@
     <script src="https://cdn.jsdelivr.net/npm/iframe-resizer/js/iframeResizer.contentWindow.min.js"></script>
   </body>
 </html>
+
