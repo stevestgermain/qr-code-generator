@@ -1,13 +1,41 @@
-import React, { useState } from 'react';
-import { QRCodeTool } from './components/QRCodeTool';
-import { Header } from './components/Header';
+import React, { useEffect, useState } from "react";
+import { QrCodeTool } from "./components/QrCodeTool";
+
+type Theme = "light" | "dark";
 
 export default function App() {
+  const [theme, setTheme] = useState<Theme>("light");
+
+  // Keep <html> in sync with internal theme state
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [theme]);
+
+  // Listen for parent postMessage events
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      const data = event.data || {};
+      if (
+        (data.type === "THEME_CHANGE" || data.type === "THEME_RESPONSE") &&
+        (data.theme === "light" || data.theme === "dark")
+      ) {
+        setTheme(data.theme);
+      }
+    }
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white pt-6 pb-12 px-4 flex justify-center items-start font-sans">
-      <div className="w-full max-w-[460px] mx-auto flex flex-col items-center">
-        <Header />
-        <QRCodeTool />
+    <div className="min-h-screen font-sans flex justify-center items-start pt-6 pb-12 px-4 bg-white text-gray-900 dark:bg-[#050706] dark:text-white">
+      <div className="w-full max-w-[460px] mx-auto">
+        <QrCodeTool />
       </div>
     </div>
   );
